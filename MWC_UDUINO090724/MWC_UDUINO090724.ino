@@ -47,7 +47,7 @@ volatile long countR = 0;
 //////////////
 const int NumCycleDelays = 40;
 int MotorLagCycles = 15; // Number of cycles to delay before updating the motor speeds - gives impression of inertia
-int counttime = 5000;       //ns that each wheel is calculating speed (25)
+int counttime = 6000;       //ns that each wheel is calculating speed (25)
 //volatile float zerothresh = 1.75; // amplitude around zero that is used to ensure stability around zero
 
 const int NumEncCycles = 3;
@@ -55,8 +55,8 @@ float zerospeedthresh = 0.0125;
 const bool Calibrate=0;  //// 0 if using hard-coded values for wheel speed calculatio, 1 if running the "Calibrate" subroutine
 
 
-ExponentialFilter<float> FilteredL(25, 0);// default 25
-ExponentialFilter<float> FilteredR(25, 0);
+ExponentialFilter<float> FilteredL(75, 0);// default 25
+ExponentialFilter<float> FilteredR(75, 0);
 
 ExponentialFilter<float> LAccFilt(2.5, 0);
 ExponentialFilter<float> RAccFilt(2.5, 0);//default2
@@ -369,14 +369,15 @@ void loop()
 
   //  Serial.println(micros()-lasttime);
   //  lasttime=micros();
-  uduino.update();
-  delay(20);
+  //uduino.update();
+  updateUnity();
+  //delay(20);
 
   //Get Encoder values
   encL = MotorReportL();
   encR = MotorReportR();
 
-   
+/*
   if (abs(encL) < 3) {
     encL = 0;
   }
@@ -384,7 +385,7 @@ void loop()
   if (abs(encR) < 3) {
        encR= 0;
   }
-
+*/
   FilteredL.Filter(encL);
   FilteredR.Filter(encR);
 
