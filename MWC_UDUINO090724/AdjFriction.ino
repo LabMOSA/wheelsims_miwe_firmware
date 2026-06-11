@@ -4,8 +4,8 @@ float AdjFriction(float encVal, float motValCurrent, float motValPrevious)
 float zerothresh = 1.75;
 float adjFric=0;
 float threshval = 2.5; 
-volatile float decline = 0.25;    //amount to reduce the speed by on each cycle if the speed is constant
-volatile float nonlineardeclinefactor = 0.05;
+volatile float decline = 10.0;    //amount to reduce the speed by on each cycle if the speed is constant
+volatile float nonlineardeclinefactor = 0.08;
     
   ////Forward
   if (encVal >= zerothresh)   // if positive speed

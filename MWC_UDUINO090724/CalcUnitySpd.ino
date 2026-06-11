@@ -3,11 +3,12 @@ float ConvertEncoder2UnityVals()
 //float ConvertEncoder2UnityVals(float encVal, int motor, int speedin)
 { // These values are calculated similary to motor values, but not adjusted for dynamics.  These are used as real-time updates to Unity, so there should be minimal lag,
   //(meaning they're not stored in the buffer) and are just a straight conversion of the encoders to current speed in a form that Unity will accept.
-
+  
   float UnityspeedPower = 1.125;
   float unityvaloffset = 0.092;
   float UnityScalar = 0.75;
   float zerospeedthresh = 0.0125;
+  
   
   if (lspeed  > zerospeedthresh)
   { LspeedUnity = -pow(abs(lspeed), UnityspeedPower) / 127 * UnityScalar - unityvaloffset;
@@ -29,6 +30,7 @@ float ConvertEncoder2UnityVals()
   { RspeedUnity = 0;
   }
 
+  
   
 //float rawspeed=0;
 //float unityvaloffset=10;

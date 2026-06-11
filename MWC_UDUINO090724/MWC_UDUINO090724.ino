@@ -14,7 +14,7 @@
 
 #include <SoftwareSerial.h>
 #include <Sabertooth.h>
-#include<Uduino.h>
+#include <Uduino.h>
 Uduino uduino("TreaHunt");
 
 SoftwareSerial SWSerial(NOT_A_PIN, 9); // RX on no pin (unused), TX on pin 11 (to S1).
@@ -47,7 +47,7 @@ volatile long countR = 0;
 //////////////
 const int NumCycleDelays = 40;
 int MotorLagCycles = 15; // Number of cycles to delay before updating the motor speeds - gives impression of inertia
-int counttime = 6000;       //ns that each wheel is calculating speed (25)
+int counttime = 7000;       //ns that each wheel is calculating speed (25)
 //volatile float zerothresh = 1.75; // amplitude around zero that is used to ensure stability around zero
 
 const int NumEncCycles = 3;
@@ -122,7 +122,6 @@ int RmotorInput = 0;
 volatile float APtilt, LRtilt, ContactX, ContactY;
 volatile float Mass = 15;
 volatile int Contact = 0;
-
 
 
 //const int pushcount = 5;
@@ -303,7 +302,7 @@ void updateUnity() {
   Serial.print(LspeedUnity);  // 0
   
   Serial.print('\t');
-  Serial.print(RspeedUnity);// 1
+  Serial.print(RspeedUnity);  // 1
 
  
   
@@ -412,6 +411,30 @@ void loop()
 
   ConvertEncoder2UnityVals();
 
+  
+
+  
+  // Dead zone management and synchronization
+  if (abs(LspeedUnity) < 0.25 && abs(RspeedUnity) < 0.25) {
+
+    //threshold for considering a wheel as active
+    bool Lactive = abs(LspeedUnity) > 0.010;
+    bool Ractive = abs(RspeedUnity) > 0.010;
+
+    //Complete shutdown if one of the engines is inactive and the other is below the minimum threshold
+    if ((!Lactive && abs(RspeedUnity) < 0.15) || (!Ractive && abs(LspeedUnity) < 0.15)) {
+        LspeedUnity = 0.0;
+        RspeedUnity = 0.0;
+    }
+
+    //Synchronization of the wheels in a straight line
+    else if (Lactive && Ractive && (LspeedUnity * RspeedUnity) > 0) {
+        float vitesseMoyenne = (LspeedUnity + RspeedUnity) / 2.0;
+        LspeedUnity = vitesseMoyenne;
+        RspeedUnity = vitesseMoyenne;
+    }
+}
+
   /////////////////////////////////
   adjFric[0] = AdjFriction(encBufferLfilt[0], encBufferLfilt[0], encBufferLfilt[1]);
   adjFric[1] = AdjFriction(encBufferRfilt[0], encBufferRfilt[0], encBufferRfilt[1]);
@@ -486,8 +509,28 @@ void loop()
   //   MotLeft.write(LmotorInput);
   //  MotRight.write(RmotorInput);
 
-  ST.motor(1, RmotorInput);
-  ST.motor(2, LmotorInput);
+  //ST.motor(1, RmotorInput);
+  //ST.motor(2, LmotorInput);
+
+  
+  // prevents one wheel from turning when the other turns
+  int safeL = LmotorInput;
+  int safeR = RmotorInput;
+
+  if (abs(encBufferLfilt[0]) < 2.0) { 
+    safeL = 0; 
+  }
+  if (abs(encBufferRfilt[0]) < 2.0) { 
+    safeR = 0; 
+  }
+
+  ST.motor(1, safeR);
+  ST.motor(2, safeL);
+ 
+}
+  
+
+  
   //
   // int motorInput=0;
   //////  MotLeft.write(motorInput);
@@ -508,7 +551,7 @@ void loop()
 //  while (Serial.available() > 0) {
 //    sCmd.readSerial();
 //  }
-}
+
 ////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////

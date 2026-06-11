@@ -4,7 +4,7 @@ void AdjWheelEq()
   //  // Equate wheelspeeds over time
 
   float speedadjdenom = 1.1;
-float rotadjdenom = 1.1;
+  float rotadjdenom = 1.1;
 
   float ladj = 0;
   float radj = 0;
